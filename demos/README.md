@@ -22,7 +22,7 @@ Install Nix(supported on MacOs and Linux) and then run the following:
 You can now run a demo such as `./result/bin/gears`.
 
 ## Windows
-Although Windows is not officially supported, the following shoudl work:
+Although Windows is not officially supported, the following should work:
 
 Once you've cloned the repo do, using [MSYS2](https://www.msys2.org/) do
 ```bash
