@@ -1,3 +1,4 @@
+newoption { trigger = "prefix", value = "PATH", description = "Installation prefix (default: /usr/local/)" }
 
 function os.capture(cmd, raw)
   local f = assert(io.popen(cmd, 'r'))
@@ -10,28 +11,37 @@ function os.capture(cmd, raw)
   return s
 end
 
-
+local prefix = _OPTIONS["prefix"] or "/usr/local/"
+local bindir = prefix .. "bin" 
 -- A solution contains projects, and defines the available configurations
 solution "Demos"
 	configurations { "Debug", "Release" }
 
-	s = os.capture("sdl2-config --cflags")
+	s = os.capture("sdl2-config --cflags --libs")
 
 	-- premake4 uses Lua 5.1 which doesn't have %g
 	--sdl_incdir = string.match(s, "-I(%g+)%s")
-	sdl_incdir, sdl_def = string.match(s, "-I([^%s]+)%s+-D([^%s]+)")
-	print(sdl_incdir, sdl_def)
-	includedirs { "../", "../glcommon", "../external", sdl_incdir }
-	libdirs { os.findlib("SDL2") }
+	sdl_incdir, sdl_def, sdl_libdir = string.match(s, "-I([^%s]+)%s+-D([^%s]+)%s+.-%-L([^%s]+)")
+	includedirs { "../glcommon", "../external", sdl_incdir }
+	libdirs { sdl_libdir }
 
 	-- stuff up here common to all projects
 	kind "ConsoleApp"
 	--location "build"
 	--targetdir "build"
 	targetdir "."
+	
+    configuration "linux or macosx"
+        postbuildcommands {
+            "cp -f $(TARGET) " .. bindir .. "/$(TARGET)"
+        }
+
 
 	configuration "linux"
 		links { "SDL2", "m" }
+		
+	configuration "macosx"
+	    links { "SDL2" }
 	
 	configuration "windows"
 		--linkdir "/mingw64/lib"
@@ -134,7 +144,7 @@ solution "Demos"
 	project "gears"
 		language "C"
 		configuration { "gmake" }
-			buildoptions { "-std=c99", "-pedantic-errors", "-Wunused-variable", "-Wreturn-type" }
+			buildoptions { "-std=c99", "-pedantic-errors", "-Wunused-variable", "-Wreturn-type", "-Wstrict-prototypes"}
 		files {
 			"./gears.c"
 		}
@@ -142,7 +152,7 @@ solution "Demos"
 	project "modelviewer"
 		language "C"
 		configuration { "gmake" }
-			buildoptions { "-std=c99", "-pedantic-errors", "-Wunused-variable", "-Wreturn-type" }
+			buildoptions { "-std=c99", "-pedantic-errors", "-Wunused-variable", "-Wreturn-type", "-Wstrict-prototypes"}
 		files {
 			"./modelviewer.c",
 			"../glcommon/chalfedge.c",
@@ -152,7 +162,7 @@ solution "Demos"
 	project "pointsprites"
 		language "C"
 		configuration { "gmake" }
-			buildoptions { "-std=c99", "-pedantic-errors", "-Wunused-variable", "-Wreturn-type" }
+			buildoptions { "-std=c99", "-pedantic-errors", "-Wunused-variable", "-Wreturn-type", "-Wstrict-prototypes", "-Wmissing-prototypes"}
 		files {
 			"./pointsprites.c",
 			"../glcommon/gltools.c",
@@ -218,16 +228,6 @@ solution "Demos"
 			"../glcommon/rsw_matstack.h",
 		}
 
-	project "polyline"
-		language "C++"
-		configuration { "gmake" }
-			buildoptions { "-fno-rtti", "-fno-exceptions", "-fno-strict-aliasing", "-Wunused-variable", "-Wreturn-type" }
-			links { "SDL2", "m" }
-		files {
-			"./polyline.cpp",
-			"../glcommon/rsw_math.cpp",
-			"../glcommon/rsw_matstack.h",
-		}
 
 	project "testprimitives"
 		language "C++"

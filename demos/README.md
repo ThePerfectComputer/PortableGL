@@ -7,7 +7,7 @@ a free for all of me experimenting and having fun.
 
 ESC will exit all of them.
 
-Flying controls = 6DOF flying controls a la 
+Flying controls = 6DOF flying controls a la
 [Descent](https://en.wikipedia.org/wiki/Descent_(video_game)).
 Mouse + WASDQE + LShift + Space
 
@@ -16,27 +16,29 @@ figure out why, please let me know by opening an issue, thanks!
 
 ## Building
 
-They all require SDL2 to be installed to build.
+Install Nix(supported on MacOs and Linux) and then run the following:
+`nix build .#portablegl-demos`
 
-On Debian/Ubuntu based distributions you can install SDL2 using the following command:
+You can now run a demo such as `./result/bin/gears`.
 
-`sudo apt install libsdl2-dev`
+## Windows
+Although Windows is not officially supported, the following shoudl work:
 
-On Mac you can download the DMG file from their [releases page](https://github.com/libsdl-org/SDL/releases/tag/release-2.32.10) or install it through
-a package manager like [Homebrew](https://brew.sh/), [MacPorts](https://ports.macports.org/), or [Fink](https://www.finkproject.org/).  Note, I do
-not own a mac and have never tested PortableGL on one.  Worst case, you can always just compile SDL2 from source but one of the above options should work.
+Once you've cloned the repo do, using [MSYS2](https://www.msys2.org/) do
+```bash
+cd demos
+premake --prefix=./ gmake
+make config=release
+./gears
+```
 
-On Windows you can grab the zip you want from the same releases page linked above.
+## Developing
 
-I use premake generated makefiles that I include in the repo which I use on Linux. I have used these same Makefiles
-to build under [MSYS2](https://www.msys2.org/) on Windows. However, at least for now, even though PortableGL and all the
-examples and demos are cross platform, I don't officially support building them on other platforms. I've thought about
-removing the premake scripts from the repo entirely and just leaving the Makefiles to make that clearer but decided not to
-for the benefit of those who want to modify it for themselves to handle different platforms and build systems. For now
-the win32 backend examples will have to suffice.
-
-Once you have SDL2 installed you should be able to cd into examples, demos, or testing, and just run `make` or `make config=release` for optimized builds.
-`make verbose=1` will let you see all the build steps. You can run `make help` to see all the individual targets.
+If you want to drop into a ready-to-use development environment, you can use
+the following command:
+```
+nix develop
+```
 
 ### Gears
 
@@ -197,4 +199,3 @@ moving useful pieces (with my own changes/preferences) into crsw_math and rsw_ma
 Currently there are no controls (yet) but there are optional command line args to control
 the number of samples and the max depth of reflection recursion.  They default to 25
 and 12 respectively, for "decent" 0.2 FPS on my desktop.
-
