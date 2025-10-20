@@ -30,8 +30,6 @@
                   version = "0.99.0";
                   src = ./.;
 
-                  # Versions can be checked with
-                  # `nix eval --json ".#riscv-bluespec-classic.nativeBuildInputs" | nix-shell -p jq --run jq`
                   nativeBuildInputs = [
                     python314
                   ];
@@ -54,6 +52,41 @@
                 }
               ) { };
 
+              portablegl-demos = pkgs.callPackage (
+                {
+                  stdenv,
+                  portablegl,
+                  SDL2,
+                  llvmPackages_20,
+                  assimp,
+                  premake4
+                }:
+                stdenv.mkDerivation {
+                  pname = "portablegl-demos";
+                  version = pkgs.portablegl.version;
+                  src = ./.;
+                  buildInputs = [
+                    stdenv
+                    portablegl
+                    SDL2
+                    llvmPackages_20.openmp
+                    assimp
+                    premake4
+                  ];
+                  premakeFlags = [ "--prefix=$(out)/" ];
+                  makeFlags = ["config=release"];
+                  preConfigure = ''
+                    cd demos
+                    mkdir -p $out/bin
+                  '';
+                  INCLUDES = "-I${pkgs.portablegl}/include/";
+                  installPhase = ''
+                    runHook preInstall
+                    runHook postInstall
+                  '';
+                }
+              ) { };
+
             })
           ];
         };
@@ -62,12 +95,13 @@
         packages = {
           default = inputs.self.packages."${system}".portablegl;
           portablegl = pkgs.portablegl;
+          portablegl-demos = pkgs.portablegl-demos;
         };
 
         devShells.default =
           with pkgs;
           mkShell {
-            inputsFrom = [ portablegl ];
+            inputsFrom = [ portablegl portablegl-demos ];
           };
       }
     );
